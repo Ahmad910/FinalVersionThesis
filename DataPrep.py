@@ -99,7 +99,7 @@ columnsToDropOneHot = ['MetaLibraryKey', 'MetaProcMasterKey', 'ExecutionDay',
 
 df.drop(columnsToDropOneHot, inplace=True, axis=1)
 df.reset_index(inplace=True, drop=True)
-df.to_csv(r'C:\Users\ahmad\Desktop\Thesis\autoencoder_' + metaLibraryKey + 'MS.csv', index=False)
+df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\autoencoder_' + metaLibraryKey + 'MS.csv', index=False)
 df.drop(['DurationSecondsMainProcess'], inplace=True, axis=1)
-df.to_csv(r'C:\Users\ahmad\Desktop\Thesis\Prediction_' + metaLibraryKey + '_MS.csv', index=False)
-df_labels.to_csv(r'C:\Users\ahmad\Desktop\Thesis\labels_' + metaLibraryKey + '_MS.csv', index=False)
+df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\Prediction_' + metaLibraryKey + '_MS.csv', index=False)
+df_labels.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\labels_' + metaLibraryKey + '_MS.csv', index=False)
