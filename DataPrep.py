@@ -7,7 +7,7 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-# Alter the metaLibraryKey [39, 40, 454, 743] to generate csv file
+# Alter the metaLibraryKey [39FD, 40FD, 454MS, 743MS] to generate csv file
 metaLibraryKey = '743'
 
 if metaLibraryKey == '743' or metaLibraryKey == '454':

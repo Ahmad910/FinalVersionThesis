@@ -12,7 +12,10 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 np.set_printoptions(threshold=sys.maxsize)
 
-metaLibraryKey = 743
+# change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
+metaLibraryKey = 40
+# set train_baseline to False to get LSTM prediction model result.
+train_baseline = False
 df_features = pd.read_csv('Prediction_' + str(metaLibraryKey) + '_MS.csv')
 labels = pd.read_csv('labels_' + str(metaLibraryKey) + '_MS.csv')
 if metaLibraryKey == 743:
@@ -53,7 +56,7 @@ def transform_to_supervised(df, n_in=1, n_out=1, dropnan=True):
     return agg
 
 
-def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch, predictions_test):
+def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch):
     predictions = list()
     y_set = y_set.reset_index(drop=True)
     y_set = y_set.to_numpy()
@@ -62,7 +65,7 @@ def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch, predict
     for i in range(0, len(x_set), n_batch):
         x = x_set[i: i + n_batch, :, :]
         y = y_set[i: i + n_batch]
-        if predictions_test == True and i > 0:
+        if i > 0:
             model.fit(x_test_old, y_test_old, epochs=n_online_epochs, batch_size=n_batch, shuffle=False, verbose=2)
             model.reset_states()
         yhat = model.predict(x, batch_size=n_batch)
@@ -70,11 +73,7 @@ def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch, predict
         x_test_old = x
         y_test_old = y
     predictions = np.asarray(predictions)
-    if predictions_test == True:
-        predictions = predictions.reshape(num_obs - n_train, 1)
-    else:
-        predictions = predictions.reshape(num_obs - n_test, 1)
-
+    predictions = predictions.reshape(num_obs - n_train, 1)
     error_list = list()
     for i in range(len(predictions)):
         error_list.append(mean_squared_error(predictions[i], y_set[i]))
@@ -83,7 +82,7 @@ def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch, predict
     return predictions, error_list
 
 
-train_baseline = True
+
 
 
 def walk_forward_validation(x_train, x_test, y_train, y_test, config):
@@ -95,14 +94,10 @@ def walk_forward_validation(x_train, x_test, y_train, y_test, config):
 
     model.fit(x_train, y_train, epochs=n_epochs, batch_size=batch_size, verbose=2, shuffle=False,
               validation_data=(x_test, y_test))
-
-    predictions_train, error_list_train = calculate_predictions(model, x_train, y_train, n_epochs, online_batch_size,
-                                                                False)
-    predictions_test, error_list_test = calculate_predictions(model, x_test, y_test, n_online_epochs, online_batch_size,
-                                                              True)
+    predictions_test, error_list_test = calculate_predictions(model, x_test, y_test, n_online_epochs, online_batch_size)
     mean_sq_error_test = mean_squared_error(predictions_test, y_test)
     # print(' > %.3f' % mean_sq_error_test)
-    return predictions_train, mean_sq_error_test, error_list_test, predictions_test
+    return mean_sq_error_test, error_list_test, predictions_test
 
 
 def plot(predictions, n_repeats, set, show=False):
@@ -134,27 +129,22 @@ def get_indices():
         return list(range(65, 96))
 
 
-def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=2):
-    key = config
+def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
     errors_test = list()
     mean_sq_errors_test = list()
-    pred_train = list()
     pred_test = list()
     stds_error_test = list()
     for i in range(n_repeats):
-        predictions_train, mean_sq_error_test, error_list_test, predictions_test = walk_forward_validation(x_train,
+        mean_sq_error_test, error_list_test, predictions_test = walk_forward_validation(x_train,
                                                                                                            x_test,
                                                                                                            y_train,
                                                                                                            y_test,
                                                                                                            config)
-        predictions_train = predictions_train[0:, 0]
-        pred_train.append(predictions_train)
         predictions_test = predictions_test[0:, 0]
         pred_test.append(predictions_test)
         mean_sq_errors_test.append(mean_sq_error_test)
         errors_test.append(error_list_test)
         stds_error_test.append(error_list_test.std())
-    plot(pred_train, n_repeats, y_train)
     plot(pred_test, n_repeats, y_test, True)
     errors_test, mean_errors_test = plot(errors_test, n_repeats, y_test)
     anomalies = np.zeros(len(errors_test))
@@ -167,7 +157,7 @@ def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=2):
     mean_error_test = np.mean(mean_sq_errors_test)
     PlotEvaluationMetrics.find_best_theta(candidate_values, anomalies, mean_errors_test, 1)
     # print('> Model[%s] %.3f' % (key, mean_error_test))
-    return (key, mean_error_test)
+    return (config, mean_error_test)
 
 
 if metaLibraryKey == 743:
