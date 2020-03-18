@@ -2,8 +2,8 @@ import numpy as np
 import PlotEvaluationMetrics
 import Functions
 
-# change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
-metaLibraryKey = 40
+
+metaLibraryKey = Functions.ask_user_to_input_metaLibraryKey()
 if metaLibraryKey == 743:
     n_test = 216
 elif metaLibraryKey == 39:

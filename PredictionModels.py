@@ -13,13 +13,10 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 np.set_printoptions(threshold=sys.maxsize)
 
-# change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
-metaLibraryKey = 40
-# set train_baseline to False to train the model with LSTM.
-train_baseline = False
+metaLibraryKey = Functions.ask_user_to_input_metaLibraryKey()
+train_baseline = Functions.ask_user_to_select_prediction_model()
 n_train = Functions.get_n_train(metaLibraryKey)
 extension = Functions.get_csv_file_extension(metaLibraryKey)
-print('Prediction_' + str(metaLibraryKey) + extension + '.csv')
 df_features = pd.read_csv(r'CSV_files\Prediction_' + str(metaLibraryKey) + extension + '.csv')
 labels = pd.read_csv(r'CSV_files\labels_' + str(metaLibraryKey) + extension + '.csv')
 lookback = 30
@@ -68,22 +65,16 @@ def walk_forward_validation(x_train, x_test, y_train, y_test, config):
 
 
 def plot(predictions, n_repeats, set, show=False):
-    predictions = np.asarray(predictions)
-    predictions = predictions.transpose()
-    mean_predictions = list()
-    for i in range(len(predictions)):
-        temp = 0
-        for j in range(len(predictions[1])):
-            temp += predictions[i][j]
-        mean_predictions.append(temp / n_repeats)
-    mean_predictions = np.asarray(mean_predictions)
+    predictions, mean_predictions = Functions.calculate_mean(predictions, n_repeats)
     if show == True:
-        plt.plot(range(len(set)), set, 'b')  # plotting t, a separately
-        plt.plot(range(len(mean_predictions)), mean_predictions, 'r')  # plotting t, b separately
+        plt.title('Actual and Predicted Values')
+        plt.plot(range(len(set)), set, 'b', label='actual')
+        plt.plot(range(len(mean_predictions)), mean_predictions, 'r', label='predicted')
+        plt.legend()
         plt.show()
     return predictions, mean_predictions
 
-def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
+def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
     errors_test = list()
     mean_sq_errors_test = list()
     pred_test = list()

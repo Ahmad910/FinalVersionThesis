@@ -11,8 +11,7 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-# change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
-metaLibraryKey = 40
+metaLibraryKey = Functions.ask_user_to_input_metaLibraryKey()
 n_train = Functions.get_n_train(metaLibraryKey)
 extension = Functions.get_csv_file_extension(metaLibraryKey)
 df_features = pd.read_csv(r'CSV_files\autoencoder_' + str(metaLibraryKey) + extension + '.csv')
@@ -52,7 +51,7 @@ x_test = data[n_train:, :]
 x_train = x_train.reshape((n_train, lookback + 1, n_features))
 x_test = x_test.reshape((num_obs - n_train, lookback + 1, n_features))
 
-def repeat_evaluate(config, n_repeats=10):
+def repeat_evaluate(config, n_repeats=1):
     n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = config
     error_list = list()
     stds = list()
@@ -77,16 +76,7 @@ def repeat_evaluate(config, n_repeats=10):
         errors = calculate_error(predictions, x_test_copy)
         error_list.append(errors)
         stds.append(errors.std())
-
-    error_list = np.asarray(error_list)
-    error_list = error_list.transpose()
-    mean_errors = list()
-    for i in range(len(error_list)):
-        temp = 0
-        for j in range(len(error_list[1])):
-            temp += error_list[i][j]
-        mean_errors.append(temp / n_repeats)
-    mean_errors = np.asarray(mean_errors)
+    error_list, mean_errors = Functions.calculate_mean(error_list, n_repeats)
     anomalies = np.zeros(len(error_list))
     anomaly_indices = Functions.get_indices(metaLibraryKey)
     for i in anomaly_indices:
@@ -94,6 +84,7 @@ def repeat_evaluate(config, n_repeats=10):
     std_error = mean_errors.std()
     candidate_values = np.linspace(std_error / 50, 2 * std_error, 100)
     PlotEvaluationMetrics.find_best_theta(candidate_values, anomalies, mean_errors)
+
 
 config = Functions.get_config_autoencoder_model(metaLibraryKey)
 repeat_evaluate(config)

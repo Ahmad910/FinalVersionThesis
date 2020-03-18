@@ -2,13 +2,14 @@ import pyodbc
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime, timedelta
+import Functions
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 # change the metaLibraryKey [39FD, 40FD, 454MS, 743MS] to generate csv file
-metaLibraryKey = '40'
+metaLibraryKey = str(Functions.ask_user_to_input_metaLibraryKey())
 
 if metaLibraryKey == '743' or metaLibraryKey == '454':
     database = 'METADATA'
@@ -99,10 +100,7 @@ columnsToDropOneHot = ['MetaLibraryKey', 'MetaProcMasterKey', 'ExecutionDay',
 
 df.drop(columnsToDropOneHot, inplace=True, axis=1)
 df.reset_index(inplace=True, drop=True)
-if metaLibraryKey == '454' or metaLibraryKey == '743':
-    extension = 'MS'
-else:
-    extension = 'FD'
+extension = Functions.get_csv_file_extension(int(metaLibraryKey))
 df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\CSV_files\autoencoder_' + metaLibraryKey + extension + '.csv', index=False)
 df.drop(['DurationSecondsMainProcess'], inplace=True, axis=1)
 df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\CSV_files\Prediction_' + metaLibraryKey + extension + '.csv', index=False)

@@ -11,7 +11,7 @@ def build_LSTM(lookback, n_nodes, n_features):
     if n_nodes == 5:
         r = 0.4
     else:
-        r = 0.3
+        r = 0.5
     model.add(Dropout(rate=r))
     model.add(LSTM(n_nodes, return_sequences=False )) #return_sequences=True
     model.add(LeakyReLU(0.3))

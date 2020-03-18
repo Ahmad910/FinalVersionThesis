@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def transform_to_supervised(df, n_in=1, n_out=1, dropnan=True):
     n_vars = df.shape[1]
@@ -32,6 +33,36 @@ def get_indices(metaLibraryKey):
     else:
         return list(range(65, 96))
 
+def ask_user_to_input_metaLibraryKey():
+    print("Please select an index between the following metaLibrarykeys:")
+    metaLibraryKeys = ["39 Fordonsdata", "40 Fordonsdata", "454 Malmä Stad", "743 Malmö Stad"]
+    for i in range(len(metaLibraryKeys)):
+        print(str(i + 1) + ". " + metaLibraryKeys[i])
+    index = -1
+    metaLibraryKey = 0
+    while index < 1 or index > len(metaLibraryKeys):
+        index = input()
+        if int(index) < 1 or int(index) > len(metaLibraryKeys):
+            print("Unvalid index, select again an index between 1 and " + str(len(metaLibraryKeys)))
+        else:
+            metaLibraryKey = int(metaLibraryKeys[int(index) - 1].split()[0])
+        index = int(index)
+    return metaLibraryKey
+
+def ask_user_to_select_prediction_model():
+    print("Please select a model to train between the following two models:")
+    print("RNN", "LSTM", sep="\n")
+    choice = ""
+    while choice.lower() != "RNN" or choice.lower() != "LSTM":
+        choice = input()
+        if choice.lower() == "RNN".lower() or choice.lower() == "LSTM".lower():
+            if choice.lower() == "RNN".lower():
+                return True
+            else:
+                return False
+        else:
+            print("Unvalid choice, select either RNN or LSTM")
+
 def get_n_train(metaLibraryKey):
     if metaLibraryKey == 743:
         return 504
@@ -47,6 +78,17 @@ def get_csv_file_extension(metaLibraryKey):
         return 'MS'
     else:
         return 'FD'
+
+def calculate_mean(array, n_repeats):
+    array = np.asarray(array)
+    array = array.transpose()
+    mean = list()
+    for i in range(len(array)):
+        temp = 0
+        for j in range(len(array[1])):
+            temp += array[i][j]
+        mean.append(temp / n_repeats)
+    return array, np.asarray(mean)
 
 def get_config_prediction_models(metaLibraryKey, train_baseline):
     if metaLibraryKey == 743:
