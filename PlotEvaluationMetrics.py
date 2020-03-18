@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def find_best_theta(candidate_values, actual_anomalies, errors, i):
+def find_best_theta(candidate_values, actual_anomalies, errors):
     recall_values = list()
     precision_values = list()
     F1__values = list()
@@ -13,12 +13,11 @@ def find_best_theta(candidate_values, actual_anomalies, errors, i):
         recall_values.append(recall)
         precision_values.append(precision)
         F1__values.append(F1)
-    if i == 1:
-        plt.plot(candidate_values, np.asarray(recall_values), color='b', label='recall')
-        plt.plot(candidate_values, np.asarray(precision_values), color='c', label='precision')
-        plt.plot(candidate_values, np.asarray(F1__values), color='m', label='F1-score')
-        plt.legend()
-        plt.show()
+    plt.plot(candidate_values, np.asarray(recall_values), color='b', label='recall')
+    plt.plot(candidate_values, np.asarray(precision_values), color='c', label='precision')
+    plt.plot(candidate_values, np.asarray(F1__values), color='m', label='F1-score')
+    plt.legend()
+    plt.show()
     return max(F1__values), max(recall_values), max(precision_values)
 
 def get_predictions(theta, errors):

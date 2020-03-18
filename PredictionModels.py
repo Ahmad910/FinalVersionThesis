@@ -4,8 +4,9 @@ import numpy as np
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-import PlotEvaluationMetrics
 from LSTM import build_LSTM
+import Functions
+import PlotEvaluationMetrics
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -13,48 +14,18 @@ pd.set_option('display.width', 1000)
 np.set_printoptions(threshold=sys.maxsize)
 
 # change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
-metaLibraryKey = 454
-# set train_baseline to False to get LSTM prediction model result.
-train_baseline = True
-df_features = pd.read_csv('Prediction_' + str(metaLibraryKey) + '_MS.csv')
-labels = pd.read_csv('labels_' + str(metaLibraryKey) + '_MS.csv')
-if metaLibraryKey == 743:
-    n_train = 504
-elif metaLibraryKey == 39:
-    n_train = 250
-elif metaLibraryKey == 40:
-    n_train = 228
-else:
-    n_train = 224
-
+metaLibraryKey = 40
+# set train_baseline to False to train the model with LSTM.
+train_baseline = False
+n_train = Functions.get_n_train(metaLibraryKey)
+extension = Functions.get_csv_file_extension(metaLibraryKey)
+print('Prediction_' + str(metaLibraryKey) + extension + '.csv')
+df_features = pd.read_csv(r'CSV_files\Prediction_' + str(metaLibraryKey) + extension + '.csv')
+labels = pd.read_csv(r'CSV_files\labels_' + str(metaLibraryKey) + extension + '.csv')
 lookback = 30
-n_features = 1
+n_features = df_features.shape[1]
 num_obs = df_features.shape[0] - lookback
 n_test = num_obs - n_train
-
-
-def transform_to_supervised(df, n_in=1, n_out=1, dropnan=True):
-    n_vars = 1
-    cols, names = list(), list()
-    # input sequence (t-n, ... t-1)
-    for i in range(n_in, 0, -1):
-        cols.append(df.shift(i))
-        names += [('var%d(t-%d)' % (j + 1, i)) for j in range(n_vars)]
-    # forecast sequence (t, t+1, ... t+n)
-    for i in range(0, n_out):
-        cols.append(df.shift(-i))
-        if i == 0:
-            names += [('var%d(t)' % (j + 1)) for j in range(n_vars)]
-        else:
-            names += [('var%d(t+%d)' % (j + 1, i)) for j in range(n_vars)]
-
-    agg = pd.concat(cols, axis=1)
-    agg.columns = names
-    # drop rows with NaN values
-    if dropnan:
-        agg.dropna(inplace=True)
-    return agg
-
 
 def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch):
     predictions = list()
@@ -108,26 +79,13 @@ def plot(predictions, n_repeats, set, show=False):
             temp += predictions[i][j]
         mean_predictions.append(temp / n_repeats)
     mean_predictions = np.asarray(mean_predictions)
-
     if show == True:
         plt.plot(range(len(set)), set, 'b')  # plotting t, a separately
         plt.plot(range(len(mean_predictions)), mean_predictions, 'r')  # plotting t, b separately
         plt.show()
     return predictions, mean_predictions
 
-
-def get_indices():
-    if metaLibraryKey == 743:
-        return [42, 43, 44, 45, 51, 74, 102, 206]
-    elif metaLibraryKey == 39:
-        return [4, 20, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72]
-    elif metaLibraryKey == 40:
-        return list(range(24, 84))
-    else:
-        return list(range(65, 96))
-
-
-def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
+def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
     errors_test = list()
     mean_sq_errors_test = list()
     pred_test = list()
@@ -142,40 +100,21 @@ def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
     plot(pred_test, n_repeats, y_test, True)
     errors_test, mean_errors_test = plot(errors_test, n_repeats, y_test)
     anomalies = np.zeros(len(errors_test))
-    anomaly_indices = get_indices()
+    anomaly_indices = Functions.get_indices(metaLibraryKey)
     for i in anomaly_indices:
         anomalies[i] = 1
     std_error = mean_errors_test.std()
     candidate_values = np.linspace(std_error / 50, 2 * std_error, 100)
     mean_sq_errors_test = np.asarray(mean_sq_errors_test)
     mean_error_test = np.mean(mean_sq_errors_test)
-    PlotEvaluationMetrics.find_best_theta(candidate_values, anomalies, mean_errors_test, 1)
+    PlotEvaluationMetrics.find_best_theta(candidate_values, anomalies, mean_errors_test)
     # print('> Model[%s] %.3f' % (key, mean_error_test))
     return (config, mean_error_test)
 
-
-if metaLibraryKey == 743:
-    if train_baseline == True:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [5, 10, 4, 4, 4]
-    else:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [10, 15, 4, 4, 4, ]
-elif metaLibraryKey == 39:
-    if train_baseline == True:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [10, 10, 4, 2, 4]
-    else:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [5, 10, 2, 2, 2]
-elif metaLibraryKey == 454:
-    n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [5, 10, 2, 2, 4]
-else:
-    if train_baseline == True:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [5, 10, 2, 2, 4]
-    else:
-        n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = [5, 10, 4, 2, 4]
-
-config = [n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size]
+config = Functions.get_config_prediction_models(metaLibraryKey, train_baseline)
 
 labels = labels[lookback - 1:]
-data = transform_to_supervised(df_features, n_in=lookback)
+data = Functions.transform_to_supervised(df_features, n_in=lookback)
 data = np.array(data)
 x_train = data[:n_train, :-n_features]
 y_train = labels[:n_train]
@@ -184,4 +123,3 @@ y_test = labels[n_train:]
 x_train = x_train.reshape((n_train, lookback, n_features))
 x_test = x_test.reshape((num_obs - n_train, lookback, n_features))
 repeat_evaluate(x_train, x_test, y_train, y_test, config)
-print('---------------------------------  done  ---------------------------------------')

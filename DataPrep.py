@@ -7,8 +7,8 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-# Alter the metaLibraryKey [39FD, 40FD, 454MS, 743MS] to generate csv file
-metaLibraryKey = '743'
+# change the metaLibraryKey [39FD, 40FD, 454MS, 743MS] to generate csv file
+metaLibraryKey = '40'
 
 if metaLibraryKey == '743' or metaLibraryKey == '454':
     database = 'METADATA'
@@ -99,7 +99,11 @@ columnsToDropOneHot = ['MetaLibraryKey', 'MetaProcMasterKey', 'ExecutionDay',
 
 df.drop(columnsToDropOneHot, inplace=True, axis=1)
 df.reset_index(inplace=True, drop=True)
-df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\autoencoder_' + metaLibraryKey + 'MS.csv', index=False)
+if metaLibraryKey == '454' or metaLibraryKey == '743':
+    extension = 'MS'
+else:
+    extension = 'FD'
+df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\CSV_files\autoencoder_' + metaLibraryKey + extension + '.csv', index=False)
 df.drop(['DurationSecondsMainProcess'], inplace=True, axis=1)
-df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\Prediction_' + metaLibraryKey + '_MS.csv', index=False)
-df_labels.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\labels_' + metaLibraryKey + '_MS.csv', index=False)
+df.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\CSV_files\Prediction_' + metaLibraryKey + extension + '.csv', index=False)
+df_labels.to_csv(r'C:\Users\ahmad\Desktop\FinalVersionThesis\CSV_files\labels_' + metaLibraryKey + extension + '.csv', index=False)
