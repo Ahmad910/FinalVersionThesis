@@ -13,9 +13,9 @@ pd.set_option('display.width', 1000)
 np.set_printoptions(threshold=sys.maxsize)
 
 # change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
-metaLibraryKey = 40
+metaLibraryKey = 454
 # set train_baseline to False to get LSTM prediction model result.
-train_baseline = False
+train_baseline = True
 df_features = pd.read_csv('Prediction_' + str(metaLibraryKey) + '_MS.csv')
 labels = pd.read_csv('labels_' + str(metaLibraryKey) + '_MS.csv')
 if metaLibraryKey == 743:
@@ -129,22 +129,19 @@ def get_indices():
         return list(range(65, 96))
 
 
-def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
+def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
     errors_test = list()
     mean_sq_errors_test = list()
     pred_test = list()
     stds_error_test = list()
     for i in range(n_repeats):
-        mean_sq_error_test, error_list_test, predictions_test = walk_forward_validation(x_train,
-                                                                                                           x_test,
-                                                                                                           y_train,
-                                                                                                           y_test,
-                                                                                                           config)
+        mean_sq_error_test, error_list_test, predictions_test = walk_forward_validation(x_train, x_test, y_train, y_test, config)
         predictions_test = predictions_test[0:, 0]
         pred_test.append(predictions_test)
         mean_sq_errors_test.append(mean_sq_error_test)
         errors_test.append(error_list_test)
         stds_error_test.append(error_list_test.std())
+        print("sssssssssssssssssssssssssss: ", i)
     plot(pred_test, n_repeats, y_test, True)
     errors_test, mean_errors_test = plot(errors_test, n_repeats, y_test)
     anomalies = np.zeros(len(errors_test))
@@ -189,5 +186,5 @@ x_test = data[n_train:, :-n_features]
 y_test = labels[n_train:]
 x_train = x_train.reshape((n_train, lookback, n_features))
 x_test = x_test.reshape((num_obs - n_train, lookback, n_features))
-repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=2)
+repeat_evaluate(x_train, x_test, y_train, y_test, config)
 print('---------------------------------  done  ---------------------------------------')
