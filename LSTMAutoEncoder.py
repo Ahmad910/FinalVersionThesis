@@ -85,6 +85,5 @@ def repeat_evaluate(config, n_repeats=1):
     candidate_values = np.linspace(std_error / 50, 2 * std_error, 100)
     PlotEvaluationMetrics.find_best_theta(candidate_values, anomalies, mean_errors)
 
-
 config = Functions.get_config_autoencoder_model(metaLibraryKey)
 repeat_evaluate(config)

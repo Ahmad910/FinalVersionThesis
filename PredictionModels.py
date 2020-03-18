@@ -63,7 +63,6 @@ def walk_forward_validation(x_train, x_test, y_train, y_test, config):
     # print(' > %.3f' % mean_sq_error_test)
     return mean_sq_error_test, error_list_test, predictions_test
 
-
 def plot(predictions, n_repeats, set, show=False):
     predictions, mean_predictions = Functions.calculate_mean(predictions, n_repeats)
     if show == True:
@@ -101,7 +100,6 @@ def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
     return (config, mean_error_test)
 
 config = Functions.get_config_prediction_models(metaLibraryKey, train_baseline)
-
 labels = labels[lookback - 1:]
 data = Functions.transform_to_supervised(df_features, n_in=lookback)
 data = np.array(data)

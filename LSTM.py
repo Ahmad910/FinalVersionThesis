@@ -3,7 +3,6 @@ from keras.layers import Dense, LeakyReLU
 from keras.layers import LSTM, Dropout
 from keras import optimizers
 
-
 def build_LSTM(lookback, n_nodes, n_features):
     model = Sequential()
     model.add(LSTM(n_nodes, input_shape=(lookback, n_features), return_sequences=True))# return_sequences=True
