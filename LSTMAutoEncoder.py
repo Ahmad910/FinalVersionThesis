@@ -51,7 +51,7 @@ x_test = data[n_train:, :]
 x_train = x_train.reshape((n_train, lookback + 1, n_features))
 x_test = x_test.reshape((num_obs - n_train, lookback + 1, n_features))
 
-def repeat_evaluate(config, n_repeats=1):
+def repeat_evaluate(config, n_repeats=10):
     n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = config
     error_list = list()
     stds = list()
