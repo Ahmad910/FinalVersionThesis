@@ -1,5 +1,6 @@
 import numpy as np
 import PlotEvaluationMetrics
+import Functions
 
 # change the metaLibraryKey [39FD, 40FD, 454MS, 743MS].
 metaLibraryKey = 40
@@ -12,17 +13,7 @@ elif metaLibraryKey == 454:
 else:
     n_test = 88
 
-def get_indices():
-    if metaLibraryKey == 743:
-        return [42, 43, 44, 45, 51, 74, 102, 206]
-    elif metaLibraryKey == 39:
-        return [4, 20, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72]
-    elif metaLibraryKey == 40:
-        return list(range(24, 84))
-    else:
-        return list(range(65, 96))
-
-anomaly_indices = get_indices()
+anomaly_indices = Functions.get_indices(metaLibraryKey)
 n_repeats = 1
 anomalies = np.zeros(n_test)
 for i in anomaly_indices:

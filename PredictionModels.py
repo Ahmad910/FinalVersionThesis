@@ -52,8 +52,6 @@ def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch):
     error_list = np.asarray(error_list)
     return predictions, error_list
 
-
-
 def walk_forward_validation(x_train, x_test, y_train, y_test, config):
     n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = config
     if train_baseline == True:
