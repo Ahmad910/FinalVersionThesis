@@ -83,7 +83,7 @@ def plot(predictions, n_repeats, set, show=False):
         plt.show()
     return predictions, mean_predictions
 
-def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=1):
+def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
     errors_test = list()
     mean_sq_errors_test = list()
     pred_test = list()
