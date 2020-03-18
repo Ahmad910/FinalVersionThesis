@@ -83,8 +83,6 @@ def calculate_predictions(model, x_set, y_set, n_online_epochs, n_batch):
 
 
 
-
-
 def walk_forward_validation(x_train, x_test, y_train, y_test, config):
     n_nodes, n_epochs, batch_size, n_online_epochs, online_batch_size = config
     if train_baseline == True:
@@ -141,7 +139,6 @@ def repeat_evaluate(x_train, x_test, y_train, y_test, config, n_repeats=10):
         mean_sq_errors_test.append(mean_sq_error_test)
         errors_test.append(error_list_test)
         stds_error_test.append(error_list_test.std())
-        print("sssssssssssssssssssssssssss: ", i)
     plot(pred_test, n_repeats, y_test, True)
     errors_test, mean_errors_test = plot(errors_test, n_repeats, y_test)
     anomalies = np.zeros(len(errors_test))
